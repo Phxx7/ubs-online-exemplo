@@ -8,19 +8,15 @@
 *{box-sizing:border-box;font-family:Arial, sans-serif}
 body{margin:0;background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh}
 .hidden{display:none}
-
-/* AUTH */
 .auth-container{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
 .container{background:white;width:100%;max-width:420px;padding:30px;border-radius:25px;box-shadow:0 15px 35px rgba(0,0,0,0.2)}
 h1{text-align:center;margin-bottom:10px}
 p.subtitle{text-align:center;color:gray;margin-bottom:20px}
-input,select,button{width:100%;padding:12px;margin:8px 0;border:none;border-radius:15px;font-size:14px}
-input,select{background:#f1f1f1}
-button{background:#4facfe;color:white;font-weight:bold;cursor:pointer;transition:0.3s}
+input,button{width:100%;padding:12px;margin:8px 0;border:none;border-radius:15px;font-size:14px}
+input{background:#f1f1f1}
+button{background:#4facfe;color:white;font-weight:bold;cursor:pointer}
 button:hover{opacity:0.85}
 .link{text-align:center;margin-top:10px;color:#4facfe;cursor:pointer;font-size:14px}
-
-/* DASHBOARD */
 .dashboard{padding:20px}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .logout{background:#ff6b6b}
@@ -30,19 +26,15 @@ button:hover{opacity:0.85}
 .card{background:white;padding:15px;border-radius:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.1)}
 .flex{display:flex;gap:15px;flex-wrap:wrap}
 .flex .card{flex:1;min-width:250px}
-
-@media (min-width:768px){
-.dashboard{max-width:1100px;margin:auto}
-}
+@media (min-width:768px){.dashboard{max-width:1100px;margin:auto}}
 </style>
 </head>
 <body>
 
-<!-- TELA INICIAL / LOGIN -->
 <div class="auth-container" id="auth">
 <div class="container">
 <h1>🏥 UBS Digital</h1>
-<p class="subtitle">Sistema online de atendimento das UBS</p>
+<p class="subtitle">Sistema online de atendimento</p>
 
 <div id="loginForm">
 <input type="email" id="loginEmail" placeholder="Email">
@@ -61,15 +53,12 @@ button:hover{opacity:0.85}
 </div>
 </div>
 
-<!-- DASHBOARD -->
 <div class="dashboard hidden" id="dashboard">
 <div class="header">
 <h2>Painel do Paciente</h2>
 <button class="logout" onclick="logout()">Sair</button>
 </div>
-
 <div class="tabs" id="tabs"></div>
-
 <div id="content"></div>
 </div>
 
@@ -96,20 +85,22 @@ document.getElementById('registerForm').classList.toggle('hidden');
 }
 
 function register(){
-const name=document.getElementById('registerName').value;
-const email=document.getElementById('registerEmail').value;
-const password=document.getElementById('registerPassword').value;
-if(!name||!email||!password) return alert('Preencha todos os campos');
+const name=document.getElementById('registerName').value.trim();
+const email=document.getElementById('registerEmail').value.trim();
+const password=document.getElementById('registerPassword').value.trim();
+if(!name||!email||!password){alert('Preencha todos os campos');return;}
 localStorage.setItem(email,JSON.stringify({name,email,password,tickets:[]}));
-alert('Cadastro realizado!');
+alert('Cadastro realizado com sucesso!');
 toggleAuth();
 }
 
 function login(){
-const email=document.getElementById('loginEmail').value;
-const password=document.getElementById('loginPassword').value;
-const user=JSON.parse(localStorage.getItem(email));
-if(!user||user.password!==password) return alert('Credenciais inválidas');
+const email=document.getElementById('loginEmail').value.trim();
+const password=document.getElementById('loginPassword').value.trim();
+const data=localStorage.getItem(email);
+if(!data){alert('Usuário não encontrado');return;}
+const user=JSON.parse(data);
+if(user.password!==password){alert('Senha incorreta');return;}
 localStorage.setItem('currentUser',email);
 loadDashboard();
 }
@@ -123,43 +114,43 @@ document.getElementById('auth').classList.remove('hidden');
 function loadDashboard(){
 document.getElementById('auth').classList.add('hidden');
 document.getElementById('dashboard').classList.remove('hidden');
-
 const tabsDiv=document.getElementById('tabs');
 tabsDiv.innerHTML='';
-
-Object.keys(ubsData).forEach((ubs,index)=>{
-tabsDiv.innerHTML+=`<button class="tab-btn ${index===0?'active':''}" onclick="showUBS('${ubs}',this)">${ubs}</button>`;
+const keys=Object.keys(ubsData);
+keys.forEach((ubs,index)=>{
+const btn=document.createElement('button');
+btn.className='tab-btn'+(index===0?' active':'');
+btn.innerText=ubs;
+btn.onclick=function(){showUBS(ubs,this)};
+tabsDiv.appendChild(btn);
 });
-
-showUBS(Object.keys(ubsData)[0],document.querySelector('.tab-btn'));
+showUBS(keys[0],tabsDiv.firstChild);
 }
 
 function showUBS(ubsName,btn){
 document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
-
+if(btn) btn.classList.add('active');
 const content=document.getElementById('content');
 content.innerHTML='';
-
 const doctors=ubsData[ubsName];
-
-let html=`<div class="flex">`;
-
+const wrapper=document.createElement('div');
+wrapper.className='flex';
 doctors.forEach(doc=>{
-html+=`
-<div class="card">
-<h3>${doc.name}</h3>
-<p>${doc.specialty}</p>
-<button onclick="takeTicket('${ubsName}','${doc.name}')">Pegar Ficha</button>
-</div>`;
+const card=document.createElement('div');
+card.className='card';
+card.innerHTML=`<h3>${doc.name}</h3><p>${doc.specialty}</p>`;
+const btn=document.createElement('button');
+btn.innerText='Pegar Ficha';
+btn.onclick=function(){takeTicket(ubsName,doc.name)};
+card.appendChild(btn);
+wrapper.appendChild(card);
 });
-
-html+=`</div>`;
-content.innerHTML=html;
+content.appendChild(wrapper);
 }
 
 function takeTicket(ubs,doctor){
 const email=localStorage.getItem('currentUser');
+if(!email)return;
 let user=JSON.parse(localStorage.getItem(email));
 const ticket=`${ubs} - ${doctor} - ${new Date().toLocaleString()}`;
 user.tickets.push(ticket);
@@ -167,9 +158,9 @@ localStorage.setItem(email,JSON.stringify(user));
 alert('Ficha gerada com sucesso!');
 }
 
-window.onload=()=>{
+window.onload=function(){
 if(localStorage.getItem('currentUser')) loadDashboard();
-}
+};
 
 </script>
 
