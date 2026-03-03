@@ -1,48 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UBS Digital</title>
 <style>
 *{box-sizing:border-box;font-family:Arial, sans-serif}
-body{margin:0;background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh}
-.hidden{display:none}
-.auth-container{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
-.container{background:white;width:100%;max-width:420px;padding:30px;border-radius:25px;box-shadow:0 15px 35px rgba(0,0,0,0.2)}
-h1{text-align:center;margin-bottom:10px}
-p.subtitle{text-align:center;color:gray;margin-bottom:20px}
-input,button{width:100%;padding:12px;margin:8px 0;border:none;border-radius:15px;font-size:14px}
-input{background:#f1f1f1}
-button{background:#4facfe;color:white;font-weight:bold;cursor:pointer}
+body{margin:0;background:linear-gradient(135deg,#4facfe,#00f2fe);display:flex;justify-content:center;align-items:center;min-height:100vh}
+.container{background:white;width:95%;max-width:420px;padding:25px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+h2{text-align:center;margin-bottom:20px}
+input,select,button{width:100%;padding:12px;margin:8px 0;border:none;border-radius:12px;font-size:14px}
+input,select{background:#f1f1f1}
+button{background:#4facfe;color:white;font-weight:bold;cursor:pointer;transition:0.3s}
 button:hover{opacity:0.85}
 .link{text-align:center;margin-top:10px;color:#4facfe;cursor:pointer;font-size:14px}
-.dashboard{padding:20px}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.hidden{display:none}
+.dashboard{max-width:900px;width:95%}
+.card{background:#f9f9f9;padding:15px;border-radius:16px;margin:10px 0;box-shadow:0 5px 15px rgba(0,0,0,0.05)}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
 .logout{background:#ff6b6b}
-.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-.tab-btn{background:white;color:#4facfe;border:2px solid #4facfe;border-radius:20px;padding:8px 15px;cursor:pointer;font-weight:bold}
-.tab-btn.active{background:#4facfe;color:white}
-.card{background:white;padding:15px;border-radius:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.1)}
-.flex{display:flex;gap:15px;flex-wrap:wrap}
+.flex{display:flex;gap:10px;flex-wrap:wrap}
 .flex .card{flex:1;min-width:250px}
-@media (min-width:768px){.dashboard{max-width:1100px;margin:auto}}
+@media (min-width:768px){
+.container{max-width:800px}
+}
 </style>
 </head>
-<body>
-
-<div class="auth-container" id="auth">
-<div class="container">
-<h1>🏥 UBS Digital</h1>
-<p class="subtitle">Sistema online de atendimento</p>
-
+<body><div class="container" id="auth">
+<h2>UBS Digital</h2>
 <div id="loginForm">
 <input type="email" id="loginEmail" placeholder="Email">
 <input type="password" id="loginPassword" placeholder="Senha">
 <button onclick="login()">Entrar</button>
 <div class="link" onclick="toggleAuth()">Não tem conta? Cadastre-se</div>
 </div>
-
 <div id="registerForm" class="hidden">
 <input type="text" id="registerName" placeholder="Nome Completo">
 <input type="email" id="registerEmail" placeholder="Email">
@@ -50,34 +40,27 @@ button:hover{opacity:0.85}
 <button onclick="register()">Cadastrar</button>
 <div class="link" onclick="toggleAuth()">Já tem conta? Entrar</div>
 </div>
-</div>
-</div>
-
-<div class="dashboard hidden" id="dashboard">
+</div><div class="container dashboard hidden" id="dashboard">
 <div class="header">
 <h2>Painel do Paciente</h2>
 <button class="logout" onclick="logout()">Sair</button>
+</div><div class="flex">
+<div class="card">
+<h3>Médicos Disponíveis</h3>
+<div id="doctorsList"></div>
+</div><div class="card">
+<h3>Pegar Ficha Online</h3>
+<select id="doctorSelect"></select>
+<button onclick="takeTicket()">Gerar Ficha</button>
+<div id="ticketInfo"></div>
 </div>
-<div class="tabs" id="tabs"></div>
-<div id="content"></div>
 </div>
-
-<script>
-
-const ubsData = {
-"UBS CAIC": [
+</div><script>
+const doctors = [
 {name:"Dr. João Silva", specialty:"Clínico Geral"},
-{name:"Dra. Ana Costa", specialty:"Pediatra"}
-],
-"UBS Bico Torto": [
-{name:"Dr. Carlos Lima", specialty:"Cardiologista"},
-{name:"Dra. Fernanda Alves", specialty:"Ginecologista"}
-],
-"UBS Bacural": [
-{name:"Dr. Marcos Souza", specialty:"Ortopedista"},
-{name:"Dra. Paula Mendes", specialty:"Dermatologista"}
-]
-};
+{name:"Dra. Maria Souza", specialty:"Pediatra"},
+{name:"Dr. Carlos Lima", specialty:"Cardiologista"}
+];
 
 function toggleAuth(){
 document.getElementById('loginForm').classList.toggle('hidden');
@@ -85,22 +68,20 @@ document.getElementById('registerForm').classList.toggle('hidden');
 }
 
 function register(){
-const name=document.getElementById('registerName').value.trim();
-const email=document.getElementById('registerEmail').value.trim();
-const password=document.getElementById('registerPassword').value.trim();
-if(!name||!email||!password){alert('Preencha todos os campos');return;}
+const name=document.getElementById('registerName').value;
+const email=document.getElementById('registerEmail').value;
+const password=document.getElementById('registerPassword').value;
+if(!name||!email||!password) return alert('Preencha todos os campos');
 localStorage.setItem(email,JSON.stringify({name,email,password,tickets:[]}));
-alert('Cadastro realizado com sucesso!');
+alert('Cadastro realizado!');
 toggleAuth();
 }
 
 function login(){
-const email=document.getElementById('loginEmail').value.trim();
-const password=document.getElementById('loginPassword').value.trim();
-const data=localStorage.getItem(email);
-if(!data){alert('Usuário não encontrado');return;}
-const user=JSON.parse(data);
-if(user.password!==password){alert('Senha incorreta');return;}
+const email=document.getElementById('loginEmail').value;
+const password=document.getElementById('loginPassword').value;
+const user=JSON.parse(localStorage.getItem(email));
+if(!user||user.password!==password) return alert('Credenciais inválidas');
 localStorage.setItem('currentUser',email);
 loadDashboard();
 }
@@ -112,57 +93,43 @@ document.getElementById('auth').classList.remove('hidden');
 }
 
 function loadDashboard(){
+const email=localStorage.getItem('currentUser');
+if(!email) return;
 document.getElementById('auth').classList.add('hidden');
 document.getElementById('dashboard').classList.remove('hidden');
-const tabsDiv=document.getElementById('tabs');
-tabsDiv.innerHTML='';
-const keys=Object.keys(ubsData);
-keys.forEach((ubs,index)=>{
-const btn=document.createElement('button');
-btn.className='tab-btn'+(index===0?' active':'');
-btn.innerText=ubs;
-btn.onclick=function(){showUBS(ubs,this)};
-tabsDiv.appendChild(btn);
-});
-showUBS(keys[0],tabsDiv.firstChild);
-}
 
-function showUBS(ubsName,btn){
-document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-if(btn) btn.classList.add('active');
-const content=document.getElementById('content');
-content.innerHTML='';
-const doctors=ubsData[ubsName];
-const wrapper=document.createElement('div');
-wrapper.className='flex';
-doctors.forEach(doc=>{
-const card=document.createElement('div');
-card.className='card';
-card.innerHTML=`<h3>${doc.name}</h3><p>${doc.specialty}</p>`;
-const btn=document.createElement('button');
-btn.innerText='Pegar Ficha';
-btn.onclick=function(){takeTicket(ubsName,doc.name)};
-card.appendChild(btn);
-wrapper.appendChild(card);
-});
-content.appendChild(wrapper);
-}
+const doctorsList=document.getElementById('doctorsList');
+const doctorSelect=document.getElementById('doctorSelect');
+doctorsList.innerHTML='';
+doctorSelect.innerHTML='';
 
-function takeTicket(ubs,doctor){
-const email=localStorage.getItem('currentUser');
-if(!email)return;
 let user=JSON.parse(localStorage.getItem(email));
-const ticket=`${ubs} - ${doctor} - ${new Date().toLocaleString()}`;
+
+doctors.forEach((doc,index)=>{
+doctorsList.innerHTML+=`<p><strong>${doc.name}</strong><br>${doc.specialty}</p>`;
+doctorSelect.innerHTML+=`<option value="${index}">${doc.name} - ${doc.specialty}</option>`;
+});
+
+if(user.tickets.length>0){
+document.getElementById('ticketInfo').innerHTML=
+"<strong>Última Ficha:</strong><br>Médico: "+user.tickets[user.tickets.length-1];
+}
+}
+
+function takeTicket(){
+const email=localStorage.getItem('currentUser');
+let user=JSON.parse(localStorage.getItem(email));
+const selected=document.getElementById('doctorSelect').value;
+const doctor=doctors[selected];
+const ticket=doctor.name+" - "+new Date().toLocaleString();
 user.tickets.push(ticket);
 localStorage.setItem(email,JSON.stringify(user));
-alert('Ficha gerada com sucesso!');
+document.getElementById('ticketInfo').innerHTML=
+"<strong>Ficha Gerada:</strong><br>Médico: "+ticket;
 }
 
-window.onload=function(){
+window.onload=()=>{
 if(localStorage.getItem('currentUser')) loadDashboard();
-};
-
-</script>
-
-</body>
+}
+</script></body>
 </html>
