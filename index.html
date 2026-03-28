@@ -1,132 +1,262 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>UBS Digital</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<title>UBS Digital</title>
 
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to right, #cfd9df, #e2ebf0);
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
 
-    .card {
-      background: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      width: 320px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
+body {
+  background: #eef3f8;
+}
 
-    .icon {
-      background: #2d6cdf;
-      color: white;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto 15px;
-      font-size: 22px;
-    }
+/* LOGIN */
+.login {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    h2 {
-      color: #2d6cdf;
-      margin-bottom: 5px;
-    }
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
 
-    p {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 20px;
-    }
+.icon {
+  background: #2d6cdf;
+  color: white;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 15px;
+  font-size: 22px;
+}
 
-    label {
-      display: block;
-      text-align: left;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
+input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #2d6cdf;
+  border-radius: 8px;
+  margin: 10px 0;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 2px solid #2d6cdf;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      outline: none;
-    }
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      background: #ccc;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+button.active {
+  background: #2d6cdf;
+  color: white;
+}
 
-    button.active {
-      background: #2d6cdf;
-      color: white;
-    }
+/* DASHBOARD */
+.dashboard {
+  display: none;
+  height: 100vh;
+}
 
-    .footer {
-      margin-top: 15px;
-      font-size: 10px;
-      color: #777;
-    }
-  </style>
+.sidebar {
+  width: 220px;
+  background: #2d6cdf;
+  color: white;
+  height: 100%;
+  position: fixed;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar li {
+  margin: 15px 0;
+  cursor: pointer;
+}
+
+.main {
+  margin-left: 220px;
+  padding: 20px;
+}
+
+.header {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.cards {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card-info {
+  flex: 1;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.table {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+/* LOADING */
+.loading {
+  display: none;
+  text-align: center;
+  margin-top: 15px;
+}
+</style>
 </head>
+
 <body>
 
+<!-- LOGIN -->
+<div class="login" id="login">
   <div class="card">
-    <div class="icon">🔍</div>
+    <div class="icon">🏥</div>
     <h2>UBS Digital</h2>
-    <p>Sistema de Gestão da Unidade Básica de Saúde</p>
+    <p>Sistema de Gestão</p>
 
-    <label>CPF do Paciente</label>
-    <input type="text" id="cpf" placeholder="000.000.000-00">
-
+    <input type="text" id="cpf" placeholder="CPF">
     <button id="btn">Entrar</button>
 
-    <div class="footer">
-      Acesso seguro e protegido • LGPD Compliance
-    </div>
+    <div class="loading" id="loading">Carregando...</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  
+  <div class="sidebar">
+    <h2>UBS</h2>
+    <ul>
+      <li onclick="showSection('home')">🏠 Início</li>
+      <li onclick="showSection('pacientes')">👥 Pacientes</li>
+      <li onclick="logout()">🚪 Sair</li>
+    </ul>
   </div>
 
-  <script>
-    const input = document.getElementById("cpf");
-    const button = document.getElementById("btn");
+  <div class="main">
 
-    input.addEventListener("input", () => {
-      if (input.value.length >= 11) {
-        button.classList.add("active");
-      } else {
-        button.classList.remove("active");
-      }
-    });
+    <div class="header">
+      <h2>Painel da Unidade</h2>
+    </div>
 
-    button.addEventListener("click", () => {
-      if (input.value.length >= 11) {
-        alert("Login realizado!");
-      } else {
-        alert("Digite um CPF válido!");
-      }
-    });
-  </script>
+    <!-- HOME -->
+    <div id="home">
+      <div class="cards">
+        <div class="card-info">Pacientes Hoje<br><b>23</b></div>
+        <div class="card-info">Consultas<br><b>12</b></div>
+        <div class="card-info">Emergência<br><b>3</b></div>
+      </div>
+    </div>
+
+    <!-- PACIENTES -->
+    <div id="pacientes" style="display:none;">
+      <div class="table">
+        <h3>Lista de Pacientes</h3>
+        <table>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>Maria Silva</td>
+            <td>123.456.789-00</td>
+            <td>Em atendimento</td>
+          </tr>
+          <tr>
+            <td>João Souza</td>
+            <td>987.654.321-00</td>
+            <td>Aguardando</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const cpf = document.getElementById("cpf");
+const btn = document.getElementById("btn");
+const loading = document.getElementById("loading");
+
+cpf.addEventListener("input", () => {
+  if (cpf.value.length >= 11) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+});
+
+btn.addEventListener("click", () => {
+  if (cpf.value.length < 11) {
+    alert("Digite um CPF válido");
+    return;
+  }
+
+  loading.style.display = "block";
+
+  setTimeout(() => {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+  }, 1500);
+});
+
+function showSection(section) {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("pacientes").style.display = "none";
+
+  document.getElementById(section).style.display = "block";
+}
+
+function logout() {
+  location.reload();
+}
+</script>
 
 </body>
 </html>
